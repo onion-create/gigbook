@@ -10,6 +10,7 @@
 </p>
 
 <p align="center">
+  <a href="https://onion-create.github.io/gigbook/"><strong>🌐 Live Demo</strong></a> &nbsp;&nbsp;
   <img src="https://img.shields.io/badge/license-BSL%201.1-orange.svg" alt="License" />
   <img src="https://img.shields.io/badge/PWA-ready-brightgreen.svg" alt="PWA" />
   <img src="https://img.shields.io/badge/AI-DeepSeek-08c.svg" alt="DeepSeek" />
@@ -37,27 +38,17 @@ No app answered that. So I built one.
 
 ## Product Preview
 
-### Home · Smart Dashboard
 <p align="center">
-  <img src="screenshots/01-dashboard.png" width="45%" alt="Home Dashboard" />
+  <img src="screenshots/08-dashboard.jpg" width="45%" alt="今日概览 · Dashboard" />
   &nbsp;
-  <img src="screenshots/02-dashboard-target.png" width="45%" alt="Monthly Goal Tracker" />
+  <img src="screenshots/09-record.jpg" width="45%" alt="记一笔 · Record" />
 </p>
-
-### Record · Platform & Category
 <p align="center">
-  <img src="screenshots/03-record-income.png" width="30%" alt="Record Income" />
+  <img src="screenshots/06-stats.jpg" width="30%" alt="数据统计 · Stats" />
   &nbsp;
-  <img src="screenshots/04-record-expense.png" width="30%" alt="Record Expense" />
+  <img src="screenshots/05-history.jpg" width="30%" alt="收支记录 · History" />
   &nbsp;
-  <img src="screenshots/05-history.png" width="30%" alt="Transaction History" />
-</p>
-
-### Analytics & Settings
-<p align="center">
-  <img src="screenshots/06-stats.png" width="45%" alt="Analytics Dashboard" />
-  &nbsp;
-  <img src="screenshots/07-profile.png" width="45%" alt="Settings & Profile" />
+  <img src="screenshots/07-profile.jpg" width="30%" alt="我的 · Profile" />
 </p>
 
 ---
