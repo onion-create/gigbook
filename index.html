@@ -1,0 +1,501 @@
+<!--
+  =============================================================================
+  跑单记 (Gigbook) — 每一单都算数
+  =============================================================================
+
+  Copyright © 2026 袁铭 (Yuan Ming). All rights reserved.
+  =============================================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>跑单记 Gigbook — 骑手日结记账 · 多平台收入追踪 · AI 收入分析</title>
+<meta name="description" content="专为骑手、快递员、网约车司机等灵活就业者设计的日结记账工具。支持美团、饿了么、闪送、货拉拉等多平台收入追踪，AI 收入分析建议，离线 PWA 可用。">
+<meta name="keywords" content="跑单记,骑手记账,外卖骑手,快递员记账,网约车记账,日结记账,收入追踪,灵活就业,零工经济,美团,饿了么,闪送,gigbook,delivery rider,offline PWA">
+<meta name="author" content="袁铭 Yuan Ming">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="跑单记">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1c1917">
+<meta name="author" content="袁铭 (Yuan Ming)">
+<meta name="description" content="专为骑手、快递员、网约车司机等灵活就业者打造的日结记账工具 · AI智能分析 · 离线可用">
+<meta name="copyright" content="Copyright © 2026 袁铭 (Yuan Ming). All rights reserved.">
+<title>跑单记 · 每一单都算数</title>
+<link rel="stylesheet" href="styles.css?v=20260808f">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-192x192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192x192.png">
+<link rel="apple-touch-icon" href="icon-192x192.png">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(function(e) { console.log('SW skip', e); });
+  }
+</script>
+<script src="./chart.umd.min.js"></script>
+<script src="config.js" onerror="console.warn('config.js not found, AI features will use local fallback')"></script>
+</head>
+<body>
+
+<header class="header" id="header">
+  <div>
+    <div class="header-title" id="headerTitle">今日概览</div>
+    <div class="header-date" id="headerDate"></div>
+  </div>
+</header>
+
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+<!-- Dashboard -->
+<div class="page active" id="page-dashboard">
+  <div class="brand-bar">
+    <span class="brand-dot"></span>
+    <span class="brand-name">跑单记</span>
+    <span class="brand-slogan">每一单都算数</span>
+  </div>
+
+  <!-- 今日卡片（主卡片） -->
+  <div class="dcard today-card" id="cardToday">
+    <div class="dcard-head">
+      <span class="dcard-icon">📅</span>
+      <span class="dcard-title">今日</span>
+      <span class="dcard-date" id="cardTodayDate"></span>
+    </div>
+    <div class="dcard-body">
+      <div class="today-hero">
+        <span class="today-hero-num" id="todayNet">¥0.00</span>
+        <span class="today-hero-label">净收入</span>
+      </div>
+      <div class="today-details">
+        <div class="td-item income">
+          <span class="td-num" id="todayIncome">¥0</span>
+          <span class="td-label">收入</span>
+        </div>
+        <div class="td-item expense">
+          <span class="td-num" id="todayExpense">¥0</span>
+          <span class="td-label">支出</span>
+        </div>
+        <div class="td-item">
+          <span class="td-num" id="todayHours">—</span>
+          <span class="td-label">工时</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 本周卡片 -->
+  <div class="dcard week-card">
+    <div class="dcard-head">
+      <span class="dcard-icon">📊</span>
+      <span class="dcard-title">本周</span>
+    </div>
+    <div class="dcard-body">
+      <div class="week-summary">
+        <div class="ws-main">
+          <span class="ws-num" id="weekNetIncome">¥0</span>
+          <span class="ws-label">净收入</span>
+        </div>
+        <div class="ws-meta" id="weekMeta">已出工 0 天</div>
+      </div>
+      <div class="week-bar-wrap" id="weekBarWrap" style="display:none">
+        <div class="week-bar-fill" id="weekBarFill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 本月目标卡片 -->
+  <div class="dcard goal-card" id="goalCard">
+    <div class="dcard-head">
+      <span class="dcard-icon">🎯</span>
+      <span class="dcard-title">本月目标</span>
+    </div>
+    <div class="dcard-body">
+      <div class="goal-summary">
+        <span class="goal-now" id="goalNow">¥0</span>
+        <span class="goal-total">/ ¥4,600</span>
+      </div>
+      <div class="goal-bar-wrap">
+        <div class="goal-bar-fill" id="goalBarFill"></div>
+      </div>
+      <div class="goal-hint" id="goalHint">—</div>
+    </div>
+  </div>
+
+  <!-- AI 建议卡片 -->
+  <div class="dcard ai-card" id="briefingCard">
+    <div class="dcard-head">
+      <span class="dcard-icon">🤖</span>
+      <span class="dcard-title">AI 工友建议</span>
+      <button class="briefing-refresh" id="briefingRefresh" onclick="generateBriefing()" title="刷新">↻</button>
+    </div>
+    <div class="dcard-body">
+      <div class="briefing-body" id="briefingBody">
+        <div class="briefing-placeholder">点击 ↻，让 AI 给你一条建议</div>
+      </div>
+    </div>
+    <div class="dcard-foot" id="briefingFooter" style="display:none">
+      <span class="briefing-meta" id="briefingMeta"></span>
+    </div>
+  </div>
+
+  <!-- 今日出工 -->
+  <div class="dcard worktime-card" id="worktimeCard">
+    <div class="dcard-head">
+      <span class="dcard-icon">⏱</span>
+      <span class="dcard-title">今日出工</span>
+    </div>
+    <div class="dcard-body">
+      <div class="worktime-body" id="worktimeBody">
+        <span class="time-range" id="worktimeRange"></span>
+        <span class="duration" id="worktimeDuration"></span>
+      </div>
+      <div class="worktime-actions" id="worktimeActions">
+        <button class="worktime-btn start-btn" id="btnStart" onclick="recordStartTime()">上班</button>
+        <button class="worktime-btn end-btn" id="btnEnd" onclick="recordEndTime()">下班</button>
+        <button class="worktime-btn edit-btn" id="btnEdit" onclick="editWorkTime()" style="display:none">修改</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 快捷操作 -->
+  <div class="quick-actions">
+    <button class="quick-btn income-btn" onclick="switchTab('record'); setRecordType('income')">💰 记一笔收入</button>
+    <button class="quick-btn expense-btn" onclick="switchTab('record'); setRecordType('expense')">💸 记一笔支出</button>
+  </div>
+</div>
+
+<!-- Record -->
+<div class="page" id="page-record">
+  <div class="record-type-toggle">
+    <button class="record-type-btn active income-tab" id="recordTypeIncome" onclick="setRecordType('income')">💰 收入</button>
+    <button class="record-type-btn expense-tab" id="recordTypeExpense" onclick="setRecordType('expense')">💸 支出</button>
+  </div>
+  <div class="amount-input-wrapper">
+    <span class="amount-currency">¥</span>
+    <input type="number" class="amount-input" id="amountInput" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+    <div class="amount-hint">输入金额，支持小数点后两位</div>
+  </div>
+
+  <div class="category-section">
+    <div class="category-label" id="categoryLabel">选择收入平台</div>
+    <div class="category-grid" id="categoryGrid"></div>
+  </div>
+
+  <div class="form-row" style="margin-top:8px">
+    <div>
+      <label>单数（选填）</label>
+      <input type="number" id="orderCountInput" placeholder="0" min="0" step="1" inputmode="numeric">
+    </div>
+  </div>
+
+  <input type="text" class="note-input" id="noteInput" placeholder="添加备注（选填）">
+  <div class="date-input-row">
+    <input type="date" id="recordDate" title="日期">
+    <input type="time" id="recordTime" title="时间">
+  </div>
+  <button class="save-btn" id="saveRecordBtn" onclick="saveRecord()">保存记录</button>
+</div>
+
+<!-- History -->
+<div class="page" id="page-history">
+  <div class="history-filters">
+    <div class="filter-row">
+      <input type="month" id="historyMonth">
+      <select id="historyType"><option value="all">全部</option><option value="income">收入</option><option value="expense">支出</option></select>
+    </div>
+    <div class="filter-row">
+      <select id="historyCategory"><option value="">全部分类</option></select>
+      <input type="text" id="historyKeyword" placeholder="搜索备注/金额">
+    </div>
+  </div>
+  <div id="historyContent"></div>
+</div>
+
+<!-- Calendar -->
+<div class="page" id="page-calendar">
+  <div class="calendar-header">
+    <button onclick="changeCalendarMonth(-1)">◀</button>
+    <div style="font-weight:700" id="calendarTitle"></div>
+    <button onclick="changeCalendarMonth(1)">▶</button>
+  </div>
+  <div class="calendar-grid" id="calendarGrid"></div>
+  <div class="calendar-legend">
+    <div class="legend-item"><span class="legend-swatch legend-swatch-income"></span><span>盈余</span></div>
+    <div class="legend-item"><span class="legend-swatch legend-swatch-loss"></span><span>亏损</span></div>
+    <span class="legend-hint">点击日期查看详情</span>
+  </div>
+  <div id="calendarDayRecords"></div>
+</div>
+
+<!-- Stats -->
+<div class="page" id="page-stats">
+  <div class="stats-period-tabs" id="periodTabs">
+    <button class="stats-period-tab active" data-period="week" onclick="setStatsPeriod('week')">本周</button>
+    <button class="stats-period-tab" data-period="month" onclick="setStatsPeriod('month')">本月</button>
+    <button class="stats-period-tab" data-period="30d" onclick="setStatsPeriod('30d')">近30天</button>
+  </div>
+
+  <div class="kpi-row" id="kpiRow"></div>
+
+  <div class="chart-panel">
+    <div class="chart-header">
+      <div class="chart-header-main">
+        <div class="chart-icon" id="chartIcon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
+        </div>
+        <div>
+          <div class="chart-title" id="chartTitle">收入趋势</div>
+          <div class="chart-subtitle" id="chartSubtitle"></div>
+        </div>
+      </div>
+      <div class="chart-meta" id="chartMeta"></div>
+    </div>
+    <div class="chart-tabs" id="chartTabs">
+      <button class="chart-tab active" data-chart="trend" onclick="setChartTab('trend')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
+        <span>趋势</span>
+      </button>
+      <button class="chart-tab" data-chart="platform" onclick="setChartTab('platform')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 3 a9 9 0 0 1 0 18 a4.5 4.5 0 0 1 0 -9 a4.5 4.5 0 0 0 0 -9 z"/></svg>
+        <span>平台</span>
+      </button>
+      <button class="chart-tab" data-chart="compare" onclick="setChartTab('compare')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="4" height="10" rx="1"/><rect x="10" y="6" width="4" height="15" rx="1"/><rect x="17" y="14" width="4" height="7" rx="1"/></svg>
+        <span>收支</span>
+      </button>
+      <button class="chart-tab" data-chart="rate" onclick="setChartTab('rate')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
+        <span>工时</span>
+      </button>
+    </div>
+    <div class="chart-wrapper"><canvas id="statsChart" height="240"></canvas></div>
+    <div class="chart-legend-bar" id="chartLegend"></div>
+    <div class="chart-insights" id="chartInsights"></div>
+  </div>
+
+  <div class="chart-panel">
+    <div class="chart-title">时间热力图 <span style="font-size:11px;font-weight:500;color:var(--text-tertiary)">收入 × 时段</span></div>
+    <div class="chart-subtitle">颜色越深表示该时段收入越高</div>
+    <div id="heatmapContainer"></div>
+  </div>
+
+</div>
+
+<!-- Profile -->
+<div class="page" id="page-profile">
+  <div class="profile-section">
+    <h4>🎯 目标设置</h4>
+    <div class="setting-row">
+      <span class="setting-label">月收入目标 (元)</span>
+      <input type="number" id="goalInput" placeholder="8000" min="0" step="100" onchange="updateIncomeGoal()">
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">月成本控制 (元)</span>
+      <input type="number" id="costGoalInput" placeholder="3000" min="0" step="100" onchange="updateCostGoal()">
+    </div>
+    <div class="goal-hint" style="margin-top:8px">设为 0 表示不启用该目标</div>
+  </div>
+
+  <div class="profile-section">
+    <h4>🎨 外观</h4>
+    <div class="setting-row" style="border-bottom:none">
+      <span class="setting-label">暗色模式</span>
+      <div class="dark-toggle" onclick="toggleDarkMode()"><div class="dark-toggle-switch" id="darkToggle"></div></div>
+    </div>
+  </div>
+
+  <div class="profile-section">
+    <h4>🏷️ 自定义分类</h4>
+    <p style="font-size:12px;color:var(--text-tertiary);margin-bottom:14px">添加后会自动出现在记账、统计、历史等所有功能中</p>
+    <div id="customCatList"></div>
+    <div class="cat-add-form">
+      <div class="cat-add-row">
+        <select id="customCatType" class="cat-type-sel"><option value="income">收入</option><option value="expense">支出</option></select>
+        <input type="text" id="customCatName" placeholder="分类名称（如：达达）" maxlength="8" class="cat-name-in" autocomplete="off">
+        <button class="cat-add-btn" onclick="addCustomCategory()">添加</button>
+      </div>
+      <div class="cat-emoji-picker">
+        <span class="cat-emoji-label">选图标</span>
+        <div class="cat-emoji-group"><span class="cat-emoji-grouplabel">外卖</span>
+          <button class="cat-emoji-btn" type="button" data-emoji="🛵" onclick="pickCustomEmoji('🛵')">🛵</button>
+          <button class="cat-emoji-btn" type="button" data-emoji="🏍️" onclick="pickCustomEmoji('🏍️')">🏍️</button>
+          <button class="cat-emoji-btn" type="button" data-emoji="🚴" onclick="pickCustomEmoji('🚴')">🚴</button>
+        </div>
+        <div class="cat-emoji-group"><span class="cat-emoji-grouplabel">出行</span>
+          <button class="cat-emoji-btn" type="button" data-emoji="🚗" onclick="pickCustomEmoji('🚗')">🚗</button>
+          <button class="cat-emoji-btn" type="button" data-emoji="🚕" onclick="pickCustomEmoji('🚕')">🚕</button>
+          <button class="cat-emoji-btn" type="button" data-emoji="🚐" onclick="pickCustomEmoji('🚐')">🚐</button>
+        </div>
+        <div class="cat-emoji-group"><span class="cat-emoji-grouplabel">货运</span>
+          <button class="cat-emoji-btn" type="button" data-emoji="🚚" onclick="pickCustomEmoji('🚚')">🚚</button>
+          <button class="cat-emoji-btn" type="button" data-emoji="📦" onclick="pickCustomEmoji('📦')">📦</button>
+          <button class="cat-emoji-btn" type="button" data-emoji="🏗️" onclick="pickCustomEmoji('🏗️')">🏗️</button>
+        </div>
+        <div class="cat-emoji-group"><span class="cat-emoji-grouplabel">生活</span>
+          <button class="cat-emoji-btn" type="button" data-emoji="🍜" onclick="pickCustomEmoji('🍜')">🍜</button>
+          <button class="cat-emoji-btn" type="button" data-emoji="☕" onclick="pickCustomEmoji('☕')">☕</button>
+          <button class="cat-emoji-btn" type="button" data-emoji="🛒" onclick="pickCustomEmoji('🛒')">🛒</button>
+          <button class="cat-emoji-btn" type="button" data-emoji="🔋" onclick="pickCustomEmoji('🔋')">🔋</button>
+        </div>
+        <div class="cat-emoji-group"><span class="cat-emoji-grouplabel">工具</span>
+          <button class="cat-emoji-btn" type="button" data-emoji="🛠️" onclick="pickCustomEmoji('🛠️')">🛠️</button>
+          <button class="cat-emoji-btn" type="button" data-emoji="💰" onclick="pickCustomEmoji('💰')">💰</button>
+          <button class="cat-emoji-btn" type="button" data-emoji="📱" onclick="pickCustomEmoji('📱')">📱</button>
+          <button class="cat-emoji-btn active" type="button" data-emoji="🏷" onclick="pickCustomEmoji('🏷')">🏷</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-section">
+    <h4>📋 数据管理</h4>
+    <button class="action-btn" onclick="exportData()">💾 备份数据 (CSV · Excel兼容)</button>
+    <button class="action-btn" onclick="importData()">📥 恢复备份 (CSV · Excel)</button>
+    <input type="file" id="importFile" accept=".csv" style="display:none" onchange="handleImport(event)">
+  </div>
+
+  <div class="profile-section">
+    <h4>ℹ️ 关于</h4>
+    <div style="font-size:13px;color:var(--text-secondary);line-height:1.8" id="aboutText">
+      <p>跑单记 v3.2.0</p>
+      <p>专为灵活就业者打造的极简记账工具</p>
+      <p style="margin-top:8px;font-size:11px;color:var(--text-tertiary)">© 2026 袁铭 (Yuan Ming). All rights reserved.</p>
+      <p style="font-size:11px;color:var(--text-tertiary)">数据仅存储在您的设备上，建议定期备份</p>
+    </div>
+  </div>
+
+  <button class="action-btn danger" onclick="confirmClear()" style="margin-top:16px;margin-bottom:16px;">清除所有数据</button>
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <button class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    <span>首页</span>
+  </button>
+  <button class="nav-item" data-tab="record" onclick="switchTab('record')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    <span>记账</span>
+  </button>
+  <button class="nav-item" data-tab="history" onclick="switchTab('history')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>记录</span>
+  </button>
+  <button class="nav-item" data-tab="stats" onclick="switchTab('stats')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span>统计</span>
+  </button>
+  <button class="nav-item" data-tab="profile" onclick="switchTab('profile')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>我的</span>
+  </button>
+</nav>
+
+<button class="fab" onclick="switchTab('record')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="deleteModal" style="display:none">
+  <div class="modal-sheet">
+    <h3>确认删除？</h3>
+    <p style="font-size:14px;color:var(--text-secondary);margin-bottom:8px" id="deleteRecordInfo"></p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeDeleteModal()">取消</button>
+      <button class="btn-danger" id="confirmDeleteBtn">删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Record Modal -->
+<div class="modal-overlay" id="editRecordModal" style="display:none" onclick="if(event.target===this) closeEditRecordModal()">
+  <div class="modal-sheet">
+    <h3>编辑记录</h3>
+    <input type="hidden" id="editRecordId">
+    <div class="form-row"><input type="number" id="editRecordAmount" placeholder="金额" inputmode="decimal"><input type="number" id="editRecordOrders" placeholder="单数" inputmode="numeric"></div>
+    <div class="form-row"><input type="date" id="editRecordDate"><input type="time" id="editRecordTime"></div>
+    <div class="form-row"><select id="editRecordType"><option value="income">收入</option><option value="expense">支出</option></select><select id="editRecordCategory"></select></div>
+    <input type="text" class="note-input" id="editRecordNote" placeholder="备注">
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeEditRecordModal()">取消</button>
+      <button class="btn-confirm" onclick="saveEditRecord()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Day Summary Modal -->
+<div class="modal-overlay" id="daySummaryModal" style="display:none" onclick="if(event.target===this) closeDaySummaryModal()">
+  <div class="day-summary-sheet">
+    <div class="ds-emoji">🏁</div>
+    <div class="ds-title">收工！今天辛苦了</div>
+    <div class="ds-stats">
+      <div class="ds-stat"><span class="ds-stat-val" id="dsNet">¥0</span><span class="ds-stat-label">今日净收入</span></div>
+      <div class="ds-stat"><span class="ds-stat-val" id="dsHours">0.0</span><span class="ds-stat-label">工作时长(小时)</span></div>
+      <div class="ds-stat"><span class="ds-stat-val" id="dsRate">¥0</span><span class="ds-stat-label">时薪</span></div>
+    </div>
+    <button class="ds-close" onclick="closeDaySummaryModal()">关闭</button>
+  </div>
+</div>
+
+<!-- Work Time Edit Modal -->
+<div class="modal-overlay" id="worktimeModal" style="display:none" onclick="if(event.target===this) closeWorktimeModal()">
+  <div class="modal-sheet">
+    <h3>调整出工时间</h3>
+    <div style="display:flex;gap:12px;margin-top:12px">
+      <div style="flex:1"><label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">上班时间</label><input type="time" id="editWorkStart" style="width:100%;padding:14px 12px;border:1.5px solid var(--border);border-radius:12px;font-size:18px;font-family:var(--font-mono);text-align:center;outline:none;background:var(--bg)"></div>
+      <div style="flex:1"><label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">下班时间</label><input type="time" id="editWorkEnd" style="width:100%;padding:14px 12px;border:1.5px solid var(--border);border-radius:12px;font-size:18px;font-family:var(--font-mono);text-align:center;outline:none;background:var(--bg)"></div>
+    </div>
+    <input type="text" class="note-input" id="editWorkNote" placeholder="班次备注（选填）">
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeWorktimeModal()">取消</button>
+      <button class="btn-confirm" onclick="saveWorkTime()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Clear Confirm Modal -->
+<div class="modal-overlay" id="clearModal" style="display:none" onclick="if(event.target===this) closeClearModal()">
+  <div class="modal-sheet">
+    <h3>清除所有数据？</h3>
+    <p style="font-size:14px;color:var(--text-secondary);margin-bottom:8px">此操作将删除所有记录、工时、车辆和设置，且无法恢复。</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeClearModal()">取消</button>
+      <button class="btn-danger" onclick="executeClear()">确认清除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Shared Card Viewer overlay (receiving side, still active) -->
+<div class="modal-overlay" id="sharedCardOverlay" style="display:none;align-items:center;justify-content:center;background:rgba(15,15,15,0.92)" onclick="if(event.target===this) this.style.display='none'">
+  <div style="background:linear-gradient(160deg,#fdf6f0,#f5ede4 30%,#faf3eb);border-radius:24px;padding:32px 24px 24px;max-width:360px;width:90%;text-align:center;">
+    <div style="font-size:14px;color:#d4a574;margin-bottom:8px;">有人分享了 跑单记 卡片</div>
+    <div class="shared-period" style="font-size:12px;color:#a89888;">—</div>
+    <div class="shared-hero" style="font-size:36px;font-weight:800;color:#3a2f28;margin:12px 0 4px;font-family:monospace;">—</div>
+    <div class="shared-sub" style="font-size:15px;font-weight:600;margin-bottom:16px;">—</div>
+    <div class="shared-stats" style="display:flex;gap:12px;justify-content:center;margin-bottom:16px;"></div>
+    <div style="font-size:13px;color:#a89888;margin-bottom:12px;">扫码使用跑单记，每一单都算数</div>
+    <button class="save-btn" style="width:100%;padding:12px;" onclick="document.getElementById('sharedCardOverlay').style.display='none';switchTab('dashboard');">开始使用</button>
+  </div>
+</div>
+
+<!-- AI Mate Chat -->
+<div class="mate-chat-overlay" id="mateChatOverlay">
+  <div class="mate-chat-header">
+    <div class="mate-avatar" style="width:36px;height:36px"><svg width="28" height="28" viewBox="0 0 28 28"><path d="M14 1 C8 1 4 5 4 11 C4 18 14 26 14 26 C14 26 24 18 24 11 C24 5 20 1 14 1 Z" fill="#d4a574" stroke="#a0704a" stroke-width="0.7"/><circle cx="14" cy="10" r="6" fill="#FFFFFF" stroke="#a0704a" stroke-width="0.5"/><circle cx="11.5" cy="9.5" r="0.9" fill="#2c2c2a"/><circle cx="16.5" cy="9.5" r="0.9" fill="#2c2c2a"/><path d="M12.5 12 Q14 13.5 15.5 12" fill="none" stroke="#2c2c2a" stroke-width="0.6" stroke-linecap="round"/><circle cx="14" cy="19" r="1.5" fill="#059669"/></svg></div>
+    <div><span style="font-weight:600;font-size:14px">小跑</span><span style="font-size:11px;color:var(--text-tertiary);margin-left:6px">你的数字工友</span></div>
+    <button class="mate-chat-close" onclick="closeMateChat()">✕</button>
+  </div>
+  <div class="mate-chat-body" id="mateChatBody">
+    <div class="mate-chat-bubble mate">嘿！我是小跑，你的工友。我可以帮你分析收入、规划目标、对比平台。有啥想聊的？</div>
+  </div>
+  <div class="mate-chat-input-row">
+    <input class="mate-chat-input" id="mateChatInput" placeholder="问问小跑..." onkeydown="if(event.key==='Enter')sendMateMessage()">
+    <button class="mate-chat-send" onclick="sendMateMessage()">↑</button>
+  </div>
+</div>
+
+<!-- Earning Script Page -->
+<!-- Application Bundle — auto-generated by build.js (compatible with file:// and http://) -->
+<script src="dist/bundle.js?v=20260808f"></script>
+</body>
+</html>

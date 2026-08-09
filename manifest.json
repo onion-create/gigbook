@@ -1,0 +1,29 @@
+{
+  "id": "com.yuanming.gigbook",
+  "name": "跑单记 · 每一单都算数",
+  "short_name": "跑单记",
+  "version": "3.4.0",
+  "description": "专为骑手、快递员、网约车司机等灵活就业者设计的日结记账与AI收入预测工具。离线可用。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#faf9f7",
+  "theme_color": "#1c1917",
+  "lang": "zh-CN",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    {
+      "src": "icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
