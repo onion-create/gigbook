@@ -89,17 +89,19 @@ The methodology: design-first iteration. Every UI decision was debated with the 
 gigbook/
 ├── index.html              # Production build — 500 lines, CSS variable-driven
 ├── dist/
-│   └── bundle.js           # Bundled application logic (2,500 lines)
+│   ├── bundle.js           # Bundled application logic (2,500 lines)
+│   ├── index.html          # Deployment copy
+│   ├── styles.css          # Deployment copy
+│   ├── sw.js / manifest    # PWA files
+│   ├── chart.umd.min.js    # Chart.js library
+│   └── screenshots/        # Product screenshots (.jpg)
 ├── styles.css              # Complete design system (1,600 lines)
 ├── sw.js                   # Service Worker (offline cache)
 ├── manifest.json           # PWA manifest
-├── chart.umd.min.js        # Chart.js CDN (visualization library)
 ├── config.example.js       # API config template — copy to config.js
-├── icon-192x192.png        # App icon (small)
-├── icon-512x512.png        # App icon (large)
-├── screenshots/            # Product screenshots
-├── .gitignore              # Excludes config.js (API keys), build tools
-├── LICENSE                 # MIT License
+├── screenshots/            # Source screenshots
+├── .gitignore              # Excludes config.js (API keys)
+├── LICENSE                 # BSL 1.1 License
 └── README.md               # This file
 ```
 
@@ -109,7 +111,7 @@ gigbook/
 
 ```bash
 # Clone and open — no build step needed
-git clone https://github.com/yourusername/gigbook.git
+git clone https://github.com/onion-create/gigbook.git
 cd gigbook
 python3 -m http.server 8080  # → http://localhost:8080
 
