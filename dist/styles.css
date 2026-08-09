@@ -108,7 +108,11 @@ html, body {
   text-rendering: optimizeLegibility;
 }
 
-body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', 'Segoe UI', Roboto, sans-serif; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+}
 .mono, .ws-val, .kpi-value, .insight-value, .pr-amt, .ps-stat-val, .ps-share {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
@@ -1605,3 +1609,85 @@ body.dark .briefing-body { color: var(--text-primary); }
 body.dark .briefing-meta, body.dark .briefing-placeholder { color: var(--text-tertiary); }
 body.dark .section-title, body.dark .see-all { color: var(--text-secondary); }
 body.dark .save-btn { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: #0F172A; }
+
+/* ============================================
+   暗色模式 — 第二轮覆盖（修复 body/header/nav）
+   ============================================ */
+body.dark {
+  background: var(--bg) !important;
+  color: var(--text-primary);
+}
+body.dark .header {
+  background: linear-gradient(180deg, rgba(11,18,32,0.99) 0%, rgba(11,18,32,0.95) 70%, transparent 100%) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+  color: var(--text-primary);
+}
+body.dark .header-title { color: var(--text-primary); }
+body.dark .header-date { color: var(--text-tertiary); }
+body.dark .nav-item { color: var(--text-tertiary); }
+body.dark .nav-item:hover { color: var(--text-secondary); }
+body.dark .nav-item.active { color: var(--accent); }
+body.dark .bottom-nav {
+  background: rgba(11,18,32,0.92);
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+body.dark .brand-bar {
+  background: transparent;
+}
+body.dark .kpi-value,
+body.dark .kpi-label,
+body.dark .ps-stat-val,
+body.dark .ws-val,
+body.dark .goal-hint,
+body.dark .text-secondary { color: var(--text-secondary); }
+body.dark .insight-value,
+body.dark .today-hero-num { color: var(--text-primary); }
+body.dark .empty-state { color: var(--text-tertiary); }
+body.dark .category-label { color: var(--text-secondary); }
+body.dark .stats-period-tab { color: var(--text-tertiary); }
+body.dark .stats-period-tab.active {
+  background: var(--accent);
+  color: #0F172A;
+}
+body.dark .chart-tab { color: var(--text-tertiary); }
+body.dark .chart-tab.active { color: var(--text-primary); }
+body.dark .record-type-btn { color: var(--text-secondary); }
+body.dark .record-type-btn.active { color: var(--text-primary); }
+body.dark .amount-input { color: var(--text-primary); background: var(--surface-solid); }
+body.dark .note-input { color: var(--text-primary); background: var(--surface-solid); }
+body.dark .date-input-row input { color: var(--text-primary); background: var(--surface-solid); }
+body.dark .filter-row input,
+body.dark .filter-row select { color: var(--text-primary); background: var(--surface-solid); }
+body.dark .history-content { color: var(--text-primary); }
+body.dark .history-day-header { color: var(--text-secondary); }
+body.dark .day-label { color: var(--text-secondary); }
+body.dark .day-total { color: var(--text-primary); }
+body.dark .record-item { color: var(--text-primary); }
+body.dark .record-item .pr-amt { color: var(--text-primary); }
+body.dark .record-note { color: var(--text-tertiary); }
+body.dark .setting-row { color: var(--text-primary); }
+body.dark .setting-label { color: var(--text-secondary); }
+body.dark .profile-section { color: var(--text-primary); }
+body.dark .action-btn { color: var(--text-primary); }
+body.dark .calendar-day { color: var(--text-secondary); }
+body.dark .calendar-day.other { color: var(--text-tertiary); }
+body.dark .calendar-day.today { color: var(--accent); }
+body.dark .calendar-day .day-net { color: var(--text-primary); }
+body.dark .calendar-title { color: var(--text-primary); }
+body.dark .calendar-legend { color: var(--text-tertiary); }
+body.dark .legend-swatch-income,
+body.dark .legend-swatch-loss { box-shadow: 0 0 0 1px rgba(255,255,255,0.10); }
+body.dark .highlight-text { color: var(--text-secondary); }
+body.dark .section-title { color: var(--text-secondary); }
+body.dark .see-all { color: var(--text-tertiary); }
+body.dark .quick-btn { color: var(--text-primary); }
+body.dark .worktime-btn { color: #fff; }
+body.dark .time-range { color: var(--text-primary); }
+body.dark .duration { color: var(--text-secondary); }
+body.dark .toast { background: var(--surface-solid); color: var(--text-primary); }
+body.dark .empty-state p { color: var(--text-tertiary); }
+body.dark input[type="text"],
+body.dark input[type="number"],
+body.dark input[type="date"],
+body.dark input[type="time"],
+body.dark select { background: var(--surface-solid); color: var(--text-primary); }
