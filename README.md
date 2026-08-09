@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" />
+  <img src="https://img.shields.io/badge/license-BSL%201.1-orange.svg" alt="License" />
   <img src="https://img.shields.io/badge/PWA-ready-brightgreen.svg" alt="PWA" />
   <img src="https://img.shields.io/badge/AI-DeepSeek-08c.svg" alt="DeepSeek" />
   <img src="https://img.shields.io/badge/works%20offline-yes-success.svg" alt="Offline" />
@@ -191,12 +191,14 @@ Add to your phone's home screen for a native app experience — works offline.
 
 ## License
 
-**MIT License.** See [LICENSE](LICENSE) for full terms.
+**Business Source License 1.1.** See [LICENSE](LICENSE) for full terms.
 
-- ✅ Use, modify, and distribute freely
-- ✅ Use commercially
-- ✅ Use privately
-- ℹ️ Attribution appreciated but not required
+- ✅ View, modify, and use for personal / non-production purposes
+- ✅ Production use with no commercial intent (e.g., educational, research)
+- ❌ Commercial production use without a separate license
+- 🔓 Automatically converts to **Apache 2.0** on **2030-08-09**
+
+For commercial licensing: contact the author.
 
 ---
 
