@@ -73,13 +73,7 @@ No app answered that. So I built one.
 
 ## The AI-Assisted Development Story
 
-*This project is a case study in AI-native product development for a non-engineer creator.*
-
 跑单记 was conceived, designed, and built by **袁铭 (Yuan Ming)** — with no formal software engineering background. The development stack: **WorkBuddy + Claude Code** as AI engineering partners, **DeepSeek API** for the AI worker advice engine, and **GitHub Pages + Tencent Cloud SCF** for zero-infrastructure deployment.
-
-The methodology: design-first iteration. Every UI decision was debated with the AI — card layout, color palette, time-window grouping, information hierarchy. Bugs were traced through console logs, CSS specificity wars, and HTML div mismatches. The result: a production-grade PWA with platform analytics, AI worker insights, dark mode, and a warm, professional design — built by a solo creator.
-
-**If you're evaluating this project:** it demonstrates product thinking, design taste, user empathy, and the persistence to ship a complete product end-to-end — the exact skill set that AI-augmented teams need in 2026.
 
 ---
 
